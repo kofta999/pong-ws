@@ -21,7 +21,11 @@ This project was created using `bun init` in bun v1.1.42. [Bun](https://bun.sh) 
 [x] Start game (leader only for ex)
 [x] Send game actions
 [x] Sync state between clients (Server Authoritative model)
-[ ] Add ball
-[ ] Calculate ball state
+[x] Add ball
+[x] Calculate ball state
 [ ] Add validations
 [ ] Improve error handling
+[ ] Improve frontend
+[ ] Improve backend code structure
+[ ] Improve ball physics (increase speed on hit, touching at the edge shouldn't make it a x:y 1:1 speed)
+[ ] Add scoring

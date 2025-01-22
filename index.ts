@@ -9,6 +9,10 @@ type Game = {
       x: number;
       y: number;
     };
+    ballVelocity: {
+      x: number;
+      y: number;
+    };
     player1Pos: number;
     player2Pos: number;
   };
@@ -129,7 +133,7 @@ const messageHandler = (clientId: string, data: Message): Message | null => {
       const gameId = data.data.gameId as string;
       const playerPos = data.data.pos as number;
 
-      const game = games.get(gameId);
+      let game = games.get(gameId);
 
       if (!game) {
         throw new Error("Game not found");
@@ -147,9 +151,6 @@ const messageHandler = (clientId: string, data: Message): Message | null => {
         });
       }
 
-      // TODO: Make this update ball pos
-      calculateState();
-
       return null;
     }
 
@@ -166,8 +167,12 @@ function createGame(): Game {
     state: {
       // TODO: change this
       ballPos: {
-        x: 0,
-        y: 0,
+        x: 50,
+        y: 50,
+      },
+      ballVelocity: {
+        x: 1,
+        y: 1,
       },
 
       // Considering it's the Y axis, both players will start at midpoint
@@ -196,12 +201,52 @@ function broadCastToClients(
 function updateState() {
   games.forEach((game) => {
     if (game.isStarted) {
+      calculateState(game);
       broadCastToClients(game.clients, "update", game.state);
     }
   });
 
   // TODO: Update to an appropriate time
-  setTimeout(updateState, 500);
+  setTimeout(updateState, 200);
 }
 
-function calculateState() {}
+function calculateState(game: Game): Game {
+  if (game.isStarted) {
+    // Update ball position based on its velocity
+    game.state.ballPos.x += game.state.ballVelocity.x;
+    game.state.ballPos.y += game.state.ballVelocity.y;
+
+    // Check for collisions with the top and bottom walls
+    if (game.state.ballPos.y <= 0 || game.state.ballPos.y >= 100) {
+      game.state.ballVelocity.y *= -1; // Reverse the y velocity
+    }
+
+    //console.log(game.state.ballPos, game.state.player2Pos);
+    // Check for collisions with the paddles
+    // Assuming the paddles are at x = 0 and x = 100
+    const paddleHeight = 20; // 20% of the game height
+
+    // Check for collisions with the paddles
+    // Assuming the paddles are at x = 0 and x = 100
+    if (
+      (game.state.ballPos.x <= 1 && // Adjusted for paddle width
+        game.state.ballPos.y >= game.state.player1Pos - paddleHeight / 2 &&
+        game.state.ballPos.y <= game.state.player1Pos + paddleHeight / 2) ||
+      (game.state.ballPos.x >= 99 && // Adjusted for paddle width
+        game.state.ballPos.y >= game.state.player2Pos - paddleHeight / 2 &&
+        game.state.ballPos.y <= game.state.player2Pos + paddleHeight / 2)
+    ) {
+      console.log("here");
+      game.state.ballVelocity.x *= -1; // Reverse the x velocity
+    }
+
+    // Check for scoring
+    if (game.state.ballPos.x <= 0 || game.state.ballPos.x >= 100) {
+      // Reset ball position and velocity
+      game.state.ballPos = { x: 50, y: 50 };
+      game.state.ballVelocity = { x: 1, y: 1 };
+    }
+  }
+
+  return game;
+}

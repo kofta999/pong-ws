@@ -15,9 +15,13 @@ bun run index.ts
 This project was created using `bun init` in bun v1.1.42. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
 
 ## TODO:
-[ ] Allow clients to connect
-[ ] Create game
-[ ] Join game
-[ ] Start game (leader only for ex)
-[ ] Send game actions
-[ ] Sync state between clients (Server Authoritative model)
+[x] Allow clients to connect
+[x] Create game
+[x] Join game
+[x] Start game (leader only for ex)
+[x] Send game actions
+[x] Sync state between clients (Server Authoritative model)
+[ ] Add ball
+[ ] Calculate ball state
+[ ] Add validations
+[ ] Improve error handling

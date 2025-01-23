@@ -25,8 +25,10 @@ This project was created using `bun init` in bun v1.2.0 [Bun](https://bun.sh) is
 - [x] Add ball
 - [x] Calculate ball state
 - [ ] Add validations
-- [ ] Improve error handling
+- [x] Improve error handling
 - [ ] Improve frontend
-- [ ] Improve backend code structure
+- [x] Improve backend code structure
 - [ ] Improve ball physics (increase speed on hit, touching at the edge shouldn't make it a x:y 1:1 speed)
 - [ ] Add scoring
+- [ ] Deal with disconnected users
+- [ ] Make Paddle velocity a backend thing

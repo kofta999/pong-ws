@@ -5,6 +5,7 @@ export class Game {
   isStarted: boolean;
   private _rules: GameRules;
   private _state: GameState;
+  private velocityMultiplier = 1.05;
 
   constructor() {
     this._clients = [];
@@ -40,10 +41,15 @@ export class Game {
   }
 
   startGame() {
-    this.isStarted = true;
+    if (this._clients.length == 2) {
+      this.isStarted = true;
+    } else {
+      throw new Error("Player length must be 2 to start the game");
+    }
   }
 
   updatePlayerPosition(player: 1 | 2, position: number) {
+    // TODO: Should I make the frontend only send the command (up / down) and I calculate the position myself?
     this._state[`player${player}`].position = position;
   }
 
@@ -81,9 +87,13 @@ export class Game {
   }
 
   resetBall() {
-    // TODO: Make velocity a bit random
-    this.updateBallPosition({ x: 50, y: 50 });
-    this.updateBallVelocity({ x: 1, y: 1 });
+    const randomVelocity = () => (Math.random() < 0.5 ? 1 : -1);
+
+    const velocityX = randomVelocity();
+    const velocityY = randomVelocity();
+
+    this.updateBallPosition({ x: 50, y: Math.random() * 100 });
+    this.updateBallVelocity({ x: velocityX, y: velocityY });
   }
 
   calculateState() {
@@ -105,20 +115,20 @@ export class Game {
     // Check for collisions with the paddles
     const isHitPaddle1 =
       // No clue why 99 works fine with width and 100 does not, same with paddle 2 and value 1
-      ballPos.x >= 99 - this.rules.paddleWidth &&
+      ballPos.x >= 99 - paddleWidth &&
       ballPos.y >= player2Pos - paddleHeight / 2 &&
       ballPos.y <= player2Pos + paddleHeight / 2;
 
     const isHitPaddle2 =
-      ballPos.x <= 1 + this.rules.paddleWidth &&
+      ballPos.x <= 1 + paddleWidth &&
       ballPos.y >= player1Pos - paddleHeight / 2 &&
       ballPos.y <= player1Pos + paddleHeight / 2;
 
-    console.log(ballPos.x, isHitPaddle2);
-
     if (isHitPaddle1 || isHitPaddle2) {
-      // TODO: Increase speed on hit
-      this.updateBallVelocity({ x: ballVelocity.x * -1, y: ballVelocity.y }); // Reverse the x velocity
+      this.updateBallVelocity({
+        x: ballVelocity.x * -1 * this.velocityMultiplier,
+        y: ballVelocity.y * this.velocityMultiplier,
+      });
     }
 
     // Check for scoring

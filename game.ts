@@ -1,17 +1,16 @@
-import type { GameRules, GameState, Vector2D } from "./types";
+import type { GameRules, GameState, GameStatus, Vector2D } from "./types";
 
 export class Game {
   private _clients: string[];
-  isStarted: boolean;
   private _rules: GameRules;
   private _state: GameState;
   private velocityMultiplier = 1.05;
 
   constructor() {
     this._clients = [];
-    this.isStarted = false;
 
     this._state = {
+      status: "standby",
       ball: {
         position: {
           x: 50,
@@ -42,7 +41,7 @@ export class Game {
 
   startGame() {
     if (this._clients.length == 2) {
-      this.isStarted = true;
+      this.state.status = "playing";
     } else {
       throw new Error("Player length must be 2 to start the game");
     }
@@ -86,6 +85,14 @@ export class Game {
     return this._rules;
   }
 
+  get status() {
+    return this.state.status;
+  }
+
+  endGame() {
+    this.state.status = "standby";
+  }
+
   resetBall() {
     const randomVelocity = () => (Math.random() < 0.5 ? 1 : -1);
 
@@ -94,6 +101,19 @@ export class Game {
 
     this.updateBallPosition({ x: 50, y: Math.random() * 100 });
     this.updateBallVelocity({ x: velocityX, y: velocityY });
+  }
+
+  // TODO: return player name or clientId?
+  getWinner(): string | null {
+    const player1Score = this.state.player1.score;
+    const player2Score = this.state.player2.score;
+    const maxScore = this._rules.maxScore;
+
+    return player1Score === maxScore
+      ? "Player1"
+      : player2Score === maxScore
+        ? "Player2"
+        : null;
   }
 
   calculateState() {
@@ -106,6 +126,9 @@ export class Game {
     const player2Pos = this.state.player2.position;
     const paddleHeight = this.rules.paddleHeight;
     const paddleWidth = this.rules.paddleWidth;
+    const player1Score = this.state.player1.score;
+    const player2Score = this.state.player2.score;
+    const maxScore = this._rules.maxScore;
 
     // Check for collisions with the top and bottom walls
     if (ballPos.y <= 0 || ballPos.y >= 100) {
@@ -133,10 +156,15 @@ export class Game {
 
     // Check for scoring
     if (ballPos.x <= 0 || ballPos.x >= 100) {
-      if (ballPos.x <= 0) {
-        this.updatePlayerScore(2);
+      if (player1Score === maxScore || player2Score === maxScore) {
+        // TODO: Make UI show who wins
+        this._state.status = "ended";
       } else {
-        this.updatePlayerScore(1);
+        if (ballPos.x <= 0) {
+          this.updatePlayerScore(2);
+        } else {
+          this.updatePlayerScore(1);
+        }
       }
 
       this.resetBall();

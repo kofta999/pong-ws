@@ -36,7 +36,7 @@ export function handler(clientId: string, data: Message) {
         throw new Error("Game not found");
       }
 
-      if (game.isStarted) {
+      if (game.status === "playing") {
         throw new Error("Game has already started, you cannot join");
       }
 
@@ -104,9 +104,14 @@ export function handler(clientId: string, data: Message) {
 
 function updateState() {
   games.forEach((game) => {
-    if (game.isStarted) {
+    if (game.status === "playing") {
       game.calculateState();
       broadCastToClients(game.getClients(), "update", game.state);
+    } else if (game.status === "ended") {
+      game.endGame();
+      broadCastToClients(game.getClients(), "end", {
+        winner: game.getWinner(),
+      });
     }
   });
 

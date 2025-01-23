@@ -1,4 +1,10 @@
-export type MessageAction = "connect" | "create" | "join" | "start" | "update";
+export type MessageAction =
+  | "connect"
+  | "create"
+  | "join"
+  | "start"
+  | "update"
+  | "end";
 
 export type Message = {
   action: MessageAction;
@@ -19,6 +25,7 @@ export type GameState = {
   };
   player1: { position: number; score: number };
   player2: { position: number; score: number };
+  status: GameStatus;
 };
 
 export type GameRules = {
@@ -26,3 +33,5 @@ export type GameRules = {
   paddleWidth: number;
   paddleHeight: number;
 };
+
+export type GameStatus = "playing" | "standby" | "ended";

@@ -6,10 +6,10 @@ export type MessageAction =
   | "update"
   | "end";
 
-export type Message = {
+export type Message<T = unknown> = {
   action: MessageAction;
   clientId: string;
-  data: Record<string, unknown>;
+  data: Record<string, T>;
 };
 
 export type WebSocketData = {

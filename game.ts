@@ -117,6 +117,9 @@ export class Game {
   }
 
   calculateState() {
+    if (this.state.status !== "playing") {
+      return;
+    }
     // Update ball position based on its velocity
     this.updateBallPosition();
 
@@ -126,8 +129,6 @@ export class Game {
     const player2Pos = this.state.player2.position;
     const paddleHeight = this.rules.paddleHeight;
     const paddleWidth = this.rules.paddleWidth;
-    const player1Score = this.state.player1.score;
-    const player2Score = this.state.player2.score;
     const maxScore = this._rules.maxScore;
 
     // Check for collisions with the top and bottom walls
@@ -156,17 +157,19 @@ export class Game {
 
     // Check for scoring
     if (ballPos.x <= 0 || ballPos.x >= 100) {
+      if (ballPos.x <= 0) {
+        this.updatePlayerScore(2);
+      } else {
+        this.updatePlayerScore(1);
+      }
+
+      const player1Score = this.state.player1.score;
+      const player2Score = this.state.player2.score;
+
       if (player1Score === maxScore || player2Score === maxScore) {
         // TODO: Make UI show who wins
         this._state.status = "ended";
-      } else {
-        if (ballPos.x <= 0) {
-          this.updatePlayerScore(2);
-        } else {
-          this.updatePlayerScore(1);
-        }
       }
-
       this.resetBall();
     }
   }

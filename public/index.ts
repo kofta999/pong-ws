@@ -1,4 +1,4 @@
-import type { GameRules, GameState } from "../types";
+import type { GameRules, GameState, Message } from "../types";
 
 const ws = new WebSocket("ws://localhost:3000/game");
 
@@ -19,6 +19,9 @@ let player1Y = 50; // Initial position in percentage
 let player2Y = 50; // Initial position in percentage
 
 let keys: { [key: string]: boolean } = {}; // To track the state of keys
+
+let player1Score = 0;
+let player2Score = 0;
 
 ws.onopen = () => {
   console.log("Connected to server");
@@ -68,7 +71,13 @@ function handleServerMessage(message: any) {
       break;
     case "update":
       gameState = message.data;
+      player1Score = gameState!.player1.score || 0;
+      player2Score = gameState!.player2.score || 0;
       drawGame();
+      break;
+    case "end":
+      const winner = message.data.winner;
+      displayWinner(winner);
       break;
     default:
       console.error("Unknown action:", message.action);
@@ -90,6 +99,15 @@ function drawGame() {
   const paddleHeight = (gameRules.paddleHeight / 100) * canvas.height;
   const paddleWidth = (gameRules.paddleWidth / 100) * canvas.width;
 
+  // Draw middle line
+  ctx.beginPath();
+  ctx.setLineDash([5, 15]);
+  ctx.moveTo(canvas.width / 2, 0);
+  ctx.lineTo(canvas.width / 2, canvas.height);
+  ctx.strokeStyle = "#0095DD";
+  ctx.stroke();
+  ctx.closePath();
+
   // Draw ball
   ctx.beginPath();
   ctx.arc(ballX, ballY, 10, 0, Math.PI * 2);
@@ -106,6 +124,21 @@ function drawGame() {
     paddleWidth,
     paddleHeight,
   );
+
+  // Draw scores
+  ctx.font = "24px Arial";
+  ctx.fillStyle = "#0095DD";
+  console.log(player1Score, player2Score);
+  ctx.fillText(player1Score.toString(), canvas.width / 4, 30);
+  ctx.fillText(player2Score.toString(), (3 * canvas.width) / 4, 30);
+}
+
+function displayWinner(winner: string) {
+  const winnerElement = document.getElementById("winner");
+  if (winnerElement) {
+    winnerElement.textContent = `Winner: ${winner}`;
+    winnerElement.style.display = "block";
+  }
 }
 
 function updatePlayerPosition(pos: number) {

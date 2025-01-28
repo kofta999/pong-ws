@@ -1,4 +1,4 @@
-import type { GameRules, GameState, GameStatus, Vector2D } from "./types";
+import type { GameRules, GameState, Vector2D } from "./types";
 
 export class Game {
   private _clients: string[];
